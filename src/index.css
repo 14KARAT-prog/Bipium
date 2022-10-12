@@ -1,13 +1,89 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.card {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  min-height: 300px;
+  min-width: 200px;
+  border-radius: 3px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  padding: 0;
+  margin: 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid black;
+  text-align: center;
+}
+
+.body-card {
+  flex: 1 0 auto;
+}
+
+.buttons {
+  flex: 0 0 auto;
+  text-align: center;
+  padding-top: 5px;
+  border-top: 1px solid black;
+}
+
+button {
+  margin: 5px;
+}
+
+.subTask {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cross {
+  border: none;
+  background-color: inherit;
+  width: 30px;
+  height: 20px;
+  --weight: 3px;
+  --aa: 1px; /* anti-aliasing */
+  --color: red;
+  background:
+          linear-gradient(45deg, transparent calc(50% - var(--weight) - var(--aa)), var(--color) calc(50% - var(--weight)), var(--color) calc(50% + var(--weight)), transparent calc(50% + var(--weight) + var(--aa))),
+          linear-gradient(-45deg, transparent calc(50% - var(--weight) - var(--aa)), var(--color) calc(50% - var(--weight)), var(--color) calc(50% + var(--weight)), transparent calc(50% + var(--weight) + var(--aa)));
+}
+
+.cross:hover {
+  cursor: pointer;
+}
+
+a {
+  color: #808080;
+  text-decoration: none;
+  transition: opacity 0.3s linear;
+}
+
+a:hover {
+  opacity: 0.5;
+}
+
+.fullCard {
+  border: 1px solid black;
+  padding: 30px;
+  border-radius: 3px;
+
+  width: 50%;
+  margin: 0 auto;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.line {
+  text-decoration: line-through;
 }
