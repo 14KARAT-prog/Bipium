@@ -4,205 +4,230 @@ import * as reactRouterDom from 'react-router-dom';
 import './index.css';
 
 // Страница карточки
-function CardPage() {
-    const textSubTask = React.useRef('');  // Ссылка на инпут
-    const { id } = reactRouterDom.useParams();   // Достаю id текущего такса из пути
-    const arraySubTasks = localStorage.getItem('arraySubTasks' + id) !== null
-        ? JSON.parse(localStorage.getItem('arraySubTasks' + id)) : [];
+function CardPage({tasks, createSubTask, deleteSubTask, handleCheck}) {
+  const textSubTask = React.useRef('');  // Ссылка на инпут
+  const { id } = reactRouterDom.useParams();   // Достаю id текущего таска из пути
 
-    const [subTasks, setSubTasks] = React.useState(arraySubTasks);
-
-    const onCreateSub = () => {
-        const newSubTasks = [...subTasks];
-        const textElem = textSubTask.current.value;
-        newSubTasks.push(textElem);
-        localStorage.setItem('arraySubTasks' + id, JSON.stringify(newSubTasks));
-        setSubTasks(newSubTasks);
-
-        textSubTask.current.value = '';
-    }
-
-    const onDeleteSubTask = (index) => {
-        const newSubTasks = [...subTasks];
-        newSubTasks.splice(index, 1);
-        localStorage.setItem('arraySubTasks' + id, JSON.stringify(newSubTasks));
-        setSubTasks(newSubTasks);
-    }
-
-    return (
-        <div className={'fullCard'}>
-            <div className={'body-card'}>
-                <p className={'head'}>Task {Number(id) + 1}</p>
-                {arraySubTasks && arraySubTasks.map((item, index) => {
-                    return (
-                        <div className={'subTask'}>
-                            <p>{index + 1}. {item}</p>
-                            <button className={'cross'} onClick={() => onDeleteSubTask(index)}></button>
-                        </div>
-                    )
-                })
-                }
-            </div>
-            <div className={'buttons'}>
-                <input type="text" ref={textSubTask} defaultValue={textSubTask.current.value} />
-                <button onClick={() => onCreateSub()}>new subtask</button>
-            </div>
-        </div>
-    )
+  
+  const onCreateSubTask = (textSubTask, id) => {
+    const textElem = textSubTask.current.value;
+    createSubTask(textElem, id);
+    
+    textSubTask.current.value = '';
+  }
+  
+  const onDeleteSubTask = (idSub, idTask) => {
+    deleteSubTask(idSub, idTask);
+  }
+  
+  const onCheck = (e, idSub, idTask) => {
+    handleCheck(e, idSub, idTask);
+  }
+  
+  return (
+    <div className={'fullCard'}>
+      <div className={'body-card'}>
+        <p className={'head'}>{tasks.arrayTasks[id].name}</p>
+        {tasks.arrayTasks[id].subTasks && tasks.arrayTasks[id].subTasks.map((item, index) => {
+            return (
+              <div className={'subTask'}>
+                <p className={item.check === true ? 'check' : ''}>
+                  <input type={'checkbox'} defaultChecked={item.check} onClick={(e) => onCheck(e,index, id)} />
+                  {index + 1}. {item.text}
+                </p>
+                <button className={'cross'} onClick={() => onDeleteSubTask(index, id)}></button>
+              </div>
+            )
+          })
+        }
+      </div>
+      <div className={'buttons'}>
+        <input type="text" ref={textSubTask} defaultValue={textSubTask.current.value} />
+        <button onClick={() => onCreateSubTask(textSubTask, id)}>new subtask</button>
+      </div>
+    </div>
+  ) 
 }
 
 // Подзадача в карточке
-function SubTask({text, index, deleteSubTask}) {
-
-    // функция описана в Card
-    const onDeleteSubTask = (index) => {
-        deleteSubTask(index);
-    }
-
-    return (
-        <div className={'subTask'}>
-            <p>{index + 1}. {text}</p>
-            <button className={'cross'} onClick={() => onDeleteSubTask(index)}></button>
-        </div>
-    )
+function SubTask({sub, idSub, idTask, deleteSubTask}) {
+  
+  //функция описана в Card (удаление подзадачи)
+  const onDeleteSubTask = (idSub, idTask) => {
+    deleteSubTask(idSub, idTask);
+  }
+  
+  return (
+    <div className={'subTask'}>
+      <p className={sub.check == true ? 'check' : ''}>{idSub + 1}. {sub.text}</p>
+      <button className={'cross'} onClick={() => onDeleteSubTask(idSub, idTask)}></button>
+    </div>
+  )
 }
 
 
 // Карточка задачи
-function Card({head, id, deleteTask}) {
-    const arraySubTasks = localStorage.getItem('arraySubTasks' + id) !== null
-        ? JSON.parse(localStorage.getItem('arraySubTasks' + id)) : [];
-
-    const [subTasks, setSubTasks] = React.useState(arraySubTasks);
-    const textSubTask = React.useRef('');  // ссылка на инпут
-
-    // функция описана в App
-    const onDeleteTask = (index) => {
-        deleteTask(index);
-    }
-
-    const deleteSubTask = (index) => {
-        const newSubTasks = [...subTasks];
-        newSubTasks.splice(index, 1);
-        localStorage.setItem('arraySubTasks' + id, JSON.stringify(newSubTasks));
-        setSubTasks(newSubTasks);
-    }
-
-    const onCreateSub = () => {
-        const newSubTasks = [...subTasks];
-        const textElem = textSubTask.current.value;
-        newSubTasks.push(textElem);
-        localStorage.setItem('arraySubTasks' + id, JSON.stringify(newSubTasks));
-        setSubTasks(newSubTasks);
-
-        textSubTask.current.value = '';
-    }
-
-    return (
-        <div className={'card'}>
-            <div className={'body-card'}>
-                <reactRouterDom.Link to={`/users/${id}`}>
-                    <p className={'head'}>{head} {id + 1}</p>
-                </reactRouterDom.Link>
-                {subTasks &&  subTasks.map((item, index) => {
-                    return (
-                        <SubTask
-                            deleteSubTask = {deleteSubTask}
-                            index = {index}
-                            text = {item}
-                        />
-                    )
-                })
-                }
-            </div>
-            <div className={'buttons'}>
-                <input type="text" ref={textSubTask} defaultValue={textSubTask.current.value} />
-                <button onClick = {() => onCreateSub()}>new subtask</button>
-                <button onClick = {() => onDeleteTask(id)}>delete Task</button>
-            </div>
-        </div>
-    )
+function Card({task, id, deleteTask, createSubTask, deleteSubTask}) {
+  const textSubTask = React.useRef('');  // ссылка на инпут
+  
+  // функция описана в App (удаление карточки)
+  const onDeleteTask = (id) => {
+    deleteTask(id);
+  }
+  
+  // функция описана в App (создание подзадачи)
+  const onCreateSubTask = (textSubTask, id) => {
+    const textElem = textSubTask.current.value;
+    createSubTask(textElem, id);
+    
+    textSubTask.current.value = '';
+  }
+  
+  return (
+    <div className={'card'}>
+      <div className={'body-card'}>
+         <reactRouterDom.Link to={`/users/${id}`}>
+           <p className={'head'}>{task.name}</p>
+         </reactRouterDom.Link>
+        {task.subTasks && task.subTasks.map((item, index) => {
+            return (
+              <SubTask 
+                sub = {item}
+                idSub = {index}
+                idTask = {id}
+                deleteSubTask={deleteSubTask}
+              />
+            )
+          })
+        }
+      </div>
+      <div className={'buttons'}>
+        <input type="text" ref={textSubTask} defaultValue={textSubTask.current.value} />
+        <button onClick = {() => onCreateSubTask(textSubTask, id)}>new subtask</button>
+        <button onClick = {() => onDeleteTask(id)}>delete Task</button>
+      </div>
+    </div>
+  )
 }
 
 
+function AppY({tasks, allClear, deleteTask, createTask, createSubTask, deleteSubTask}) {
+  
+  return (
+    <React.Fragment>
+      <div className={'container'}>
+        {tasks.arrayTasks && tasks.arrayTasks.map((item, index) => {
+            return (
+              <Card
+                task={item}
+                id = {index}
+                deleteTask = {deleteTask}
+                createSubTask = {createSubTask}
+                deleteSubTask = {deleteSubTask}
+                />
+            )
+          })  
+        }
+      </div>
+      <button onClick={() => createTask()}>Add Task</button>
+      <button onClick={() => allClear()}>Delete All Tasks</button>
+    </React.Fragment>
+  )
+}
+
 // Основная функция
 function App() {
-    const arrayTasks = localStorage.getItem('arrayTasks') !== null
-        ? JSON.parse(localStorage.getItem('arrayTasks')) : [];
+  // Достаю данные из localStorage или создаю новые
+  let task
+  if (localStorage.getItem('tasks') == null) {
+    task = {name: 'tasks', arrayTasks: []};
+    localStorage.setItem('tasks', JSON.stringify(task));
+  } else {
+    task = JSON.parse(localStorage.getItem('tasks'));
+  }
 
-    const [tasks, setTasks] = React.useState(arrayTasks);
 
-    // Для синхронизации localStorage
-    const storageEventHandler = () => {
-        const synchronized = JSON.parse(localStorage.getItem('arrayTasks'));
-        setTasks(synchronized);
-    }
-    // Подписка на события в localStorage
-    React.useEffect(() => {
-        window.addEventListener('storage', storageEventHandler, false);
+  const [tasks, setTasks] = React.useState(task);
+  
+  //Для синхронизации localStorage
+  const storageEventHandler = () => {
+    const synchronized = JSON.parse(localStorage.getItem('tasks'));
+    setTasks(synchronized);
+  }
+  //Подписка на события в localStorage
+  React.useEffect(() => {
+      window.addEventListener('storage', storageEventHandler, false);
     }, []);
+  
+  // убирает все task и subtask
+  const allClear = () => {
+    task = {name: 'tasks', arrayTasks: []};
+    localStorage.setItem('tasks', JSON.stringify(task));
+    setTasks(task);
+  }
+  
+  // Удаление карточки по id
+  const deleteTask = (id) => {
+    const newTask = {...tasks};
+    newTask.arrayTasks.splice(id, 1);
+    localStorage.setItem('tasks', JSON.stringify(newTask));
+    setTasks(newTask);
+  }
 
-    // убирает все task и subtask
-    const allClear = () => {
-        for (let i = 0;i < arrayTasks.length;i++) {
-            localStorage.removeItem('arraySubTasks' + i);
-        }
-        localStorage.removeItem('arrayTasks');
-        setTasks([]);
-    }
-
-    const deleteTask = (index) => {
-        const newTask = [...tasks];
-        newTask.splice(index, 1);
-        localStorage.setItem('arrayTasks', JSON.stringify(newTask));
-        setTasks(newTask);
-
-        localStorage.removeItem('arraySubTasks' + index);
-    }
-
-    const createTask = () => {
-        const newTask = [...tasks];
-        newTask.push('Task');
-        localStorage.setItem('arrayTasks', JSON.stringify(newTask));
-        setTasks(newTask);
-    }
-
-    return (
-        <React.Fragment>
-            <div className={'container'}>
-                {tasks && tasks.map((item, index) => {
-                    return (
-                        <Card
-                            id = {index}
-                            head={item}
-                            deleteTask = {deleteTask}
-                        />
-                    )
-                })
-                }
-            </div>
-            <button onClick={() => createTask()}>Add Task</button>
-            <button onClick={() => allClear()}>Delete All Tasks</button>
-        </React.Fragment>
-    )
+  // Создание новой карточки
+  const createTask = () => {
+    const newTask = {...tasks};
+    newTask.arrayTasks.push({name: `Task ${newTask.arrayTasks.length + 1}`, subTasks: []});
+    localStorage.setItem('tasks', JSON.stringify(newTask));
+    setTasks(newTask);
+  }
+  
+  // Создание подзадачи
+  const createSubTask = (textElem, id) => {
+    const newSubTasks = {...tasks};
+    newSubTasks.arrayTasks[id].subTasks.push({text: textElem, check: false});
+    localStorage.setItem('tasks', JSON.stringify(newSubTasks));
+    setTasks(newSubTasks);
+  }
+  
+  // Удаление подзадачи
+  const deleteSubTask = (idSub, idTask) => {
+    const newSubTasks = {...tasks};
+    newSubTasks.arrayTasks[idTask].subTasks.splice(idSub, 1);
+    localStorage.setItem('tasks', JSON.stringify(newSubTasks));
+    setTasks(newSubTasks);
+  }
+  
+  const handleCheck = (e, idSub, idTask) => {
+    const newSubTasks = {...tasks};
+    newSubTasks.arrayTasks[idTask].subTasks[idSub].check = e.target.checked;
+    localStorage.setItem('tasks', JSON.stringify(newSubTasks));
+    setTasks(newSubTasks);
+  }
+  
+  return (
+    <React.Fragment>
+      <nav>
+        <ul>
+          <li>
+            <reactRouterDom.Link to="/">Main</reactRouterDom.Link>
+          </li>
+        </ul>
+      </nav>
+      <reactRouterDom.Routes>
+        <reactRouterDom.Route path={'/'} element={<AppY  tasks={tasks} allClear={allClear} deleteTask={deleteTask} createTask={createTask} createSubTask={createSubTask} deleteSubTask={deleteSubTask} />} />
+        <reactRouterDom.Route path="users/:id/*" element={<CardPage tasks={tasks} createSubTask={createSubTask} deleteSubTask={deleteSubTask} handleCheck={handleCheck} />} />
+      </reactRouterDom.Routes>
+    </React.Fragment>
+  )
 }
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <reactRouterDom.BrowserRouter>
-            <nav>
-                <ul>
-                    <li>
-                        <reactRouterDom.Link to="/">Main</reactRouterDom.Link>
-                    </li>
-                </ul>
-            </nav>
-            <reactRouterDom.Routes>
-                <reactRouterDom.Route path={'/'} element={<App />} />
-                <reactRouterDom.Route path="users/:id/*" element={<CardPage />} />
-            </reactRouterDom.Routes>
-        </reactRouterDom.BrowserRouter>
-    </React.StrictMode>
+    <reactRouterDom.BrowserRouter>
+      <App />
+    </reactRouterDom.BrowserRouter>
+  </React.StrictMode>
 );
