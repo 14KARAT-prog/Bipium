@@ -84,6 +84,6 @@ a:hover {
   flex-direction: column;
 }
 
-.line {
+.check {
   text-decoration: line-through;
 }
